@@ -1,0 +1,53 @@
+{
+  "format": 1,
+  "restore": {
+    "/Users/jakubkindracki/RiderProjects/LAB10_AiSD2/LAB10_AiSD2_2023/LAB10_AiSD2_2023.csproj": {}
+  },
+  "projects": {
+    "/Users/jakubkindracki/RiderProjects/LAB10_AiSD2/LAB10_AiSD2_2023/LAB10_AiSD2_2023.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/Users/jakubkindracki/RiderProjects/LAB10_AiSD2/LAB10_AiSD2_2023/LAB10_AiSD2_2023.csproj",
+        "projectName": "LAB10_AiSD2_2023",
+        "projectPath": "/Users/jakubkindracki/RiderProjects/LAB10_AiSD2/LAB10_AiSD2_2023/LAB10_AiSD2_2023.csproj",
+        "packagesPath": "/Users/jakubkindracki/.nuget/packages/",
+        "outputPath": "/Users/jakubkindracki/RiderProjects/LAB10_AiSD2/LAB10_AiSD2_2023/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/Users/jakubkindracki/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net4.7.1"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net471": {
+            "targetAlias": "net4.7.1",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net471": {
+          "targetAlias": "net4.7.1",
+          "dependencies": {
+            "Microsoft.NETFramework.ReferenceAssemblies": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[1.0.3, )",
+              "autoReferenced": true
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.100/RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}
