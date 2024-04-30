@@ -11,3 +11,4 @@
 /Users/jakubkindracki/RiderProjects/LAB10_AiSD2/LAB10_AiSD2_2023/obj/Debug/net4.7.1/LAB10_AiSD2_2023.csproj.CopyComplete
 /Users/jakubkindracki/RiderProjects/LAB10_AiSD2/LAB10_AiSD2_2023/obj/Debug/net4.7.1/LAB10_AiSD2_2023.exe
 /Users/jakubkindracki/RiderProjects/LAB10_AiSD2/LAB10_AiSD2_2023/obj/Debug/net4.7.1/LAB10_AiSD2_2023.pdb
+/Users/jakubkindracki/RiderProjects/LAB10_AiSD2/LAB10_AiSD2_2023/obj/Debug/net4.7.1/LAB10_AiSD2_2023.sourcelink.json

@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using ASD.Graphs;
 
 namespace ASD
@@ -75,9 +76,12 @@ namespace ASD
         public (bool routeExists, int[] route) FindEscapeWithHeadstart(Graph labyrinth, int startingTorches, int[] roomTorches, int debt, int[] roomGold, int dragonDelay)
         {
             int[] visited = new int[labyrinth.VertexCount];
+            
             visited[0] = 1;
+            if (dragonDelay != Int32.MaxValue)
+                dragonDelay += 1;
             (var routeExists, var route) =
-                FindEscapeWithHeadstartRec(labyrinth, startingTorches + roomTorches[0], roomTorches, debt - roomGold[0], roomGold, dragonDelay + 1, visited, 0);
+                FindEscapeWithHeadstartRec(labyrinth, startingTorches + roomTorches[0], roomTorches, debt - roomGold[0], roomGold, dragonDelay, visited, 0);
             if (route == null)
                 return (false, null);
 
@@ -96,20 +100,31 @@ namespace ASD
                 if (debt <= 0)
                     return (true, new List<int>(){room});
 
-                return (false, null);
+                return (false, null); // moze chodzi o to, ze mozna przejsc przez koniec dalej?
+                // wyszlo na to samo :(
+                // bool end = true;
+                // foreach (var n in labyrinth.OutNeighbors(room))
+                // {
+                //     if (visited[room] == 0)
+                //         end = false;
+                // }
+                //
+                // if (end)
+                //     return (false, null);
             }
             else if (startingTorches <= 0)
             {
                 return (false, null);
             }
-
+            // TODO: chyba trzeba usunac to co teraz z sasiadami i zrobic rekurencyjny BFS i wybieram zawsze najpierw nieodwiedzone, w ogole
+            // TODO: w ogole to mozna by tez ustawiac torches i gold na 0 tam gdzie juz bylem
             bool routeExists = false;
             List<int> route = null;
             foreach (var neighbor in labyrinth.OutNeighbors(room))
             {
                 if (visited[neighbor] != 0 && visited[room] + 1 - visited[neighbor] > dragonDelay)
                     continue;
-
+                
                 if (visited[neighbor] != 0)
                 {
                     int oldDelay = dragonDelay;
@@ -118,7 +133,7 @@ namespace ASD
                     visited[neighbor] = visited[room] + 1;
                     (routeExists, route) =
                         FindEscapeWithHeadstartRec(labyrinth, startingTorches - 1, roomTorches,
-                            debt, roomGold, dragonDelay, visited, neighbor);
+                            debt, roomGold, dragonDelay, visited,neighbor);
                     dragonDelay = oldDelay;
                     visited[neighbor] = temp;
                 }
