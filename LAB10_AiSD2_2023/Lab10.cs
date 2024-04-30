@@ -78,8 +78,6 @@ namespace ASD
             int[] visited = new int[labyrinth.VertexCount];
             
             visited[0] = 1;
-            if (dragonDelay != Int32.MaxValue)
-                dragonDelay += 1;
             (var routeExists, var route) =
                 FindEscapeWithHeadstartRec(labyrinth, startingTorches + roomTorches[0], roomTorches, debt - roomGold[0], roomGold, dragonDelay, visited, 0);
             if (route == null)
@@ -94,7 +92,6 @@ namespace ASD
         public (bool routeExists, List<int> route) FindEscapeWithHeadstartRec(Graph labyrinth, int startingTorches, int[] roomTorches, int debt, int[] roomGold, 
             int dragonDelay, int[] visited, int room)
         {
-            
             if (room == labyrinth.VertexCount - 1)
             {
                 if (debt <= 0)
@@ -116,24 +113,26 @@ namespace ASD
             {
                 return (false, null);
             }
-            // TODO: chyba trzeba usunac to co teraz z sasiadami i zrobic rekurencyjny BFS i wybieram zawsze najpierw nieodwiedzone, w ogole
-            // TODO: w ogole to mozna by tez ustawiac torches i gold na 0 tam gdzie juz bylem
+            // TODO: trzeba jakos zapisac wiercholki, ktore odwiedzil smok, bo teraz mozna je odwiedzic, (i je odwiedzam :( )
             bool routeExists = false;
             List<int> route = null;
             foreach (var neighbor in labyrinth.OutNeighbors(room))
             {
-                if (visited[neighbor] != 0 && visited[room] + 1 - visited[neighbor] > dragonDelay)
+                // if (visited[neighbor] != 0 && visited[neighbor] < visited[room] - dragonDelay) // TODO: przydaloby sie stare visited[room]
+                //     continue;
+                
+                if (visited[neighbor] != 0 && visited[room] - visited[neighbor] > dragonDelay)
                     continue;
                 
                 if (visited[neighbor] != 0)
                 {
                     int oldDelay = dragonDelay;
-                    dragonDelay -= visited[room] + 1 - visited[neighbor];
-                    int temp = visited[neighbor];
+                    dragonDelay -= visited[room] - visited[neighbor];
+                    int temp = visited[neighbor];// TODO: moze nie robic tego, tylko zachowywac stare numery?
                     visited[neighbor] = visited[room] + 1;
                     (routeExists, route) =
                         FindEscapeWithHeadstartRec(labyrinth, startingTorches - 1, roomTorches,
-                            debt, roomGold, dragonDelay, visited,neighbor);
+                            debt, roomGold, dragonDelay, visited, neighbor);
                     dragonDelay = oldDelay;
                     visited[neighbor] = temp;
                 }
