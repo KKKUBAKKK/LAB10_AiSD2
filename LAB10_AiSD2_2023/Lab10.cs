@@ -75,11 +75,22 @@ namespace ASD
 
         public (bool routeExists, int[] route) FindEscapeWithHeadstart(Graph labyrinth, int startingTorches, int[] roomTorches, int debt, int[] roomGold, int dragonDelay)
         {
-            int[] visited = new int[labyrinth.VertexCount];
+            (int next, int torches, int debt)[] visited = new(int next, int torches, int debt)[labyrinth.VertexCount];
             
-            visited[0] = 1;
+            visited[0].next = -1;
+            visited[0].torches = startingTorches + roomTorches[0];
+            visited[0].debt = debt - roomGold[0];
+            roomTorches[0] = 0;
+            roomGold[0] = 0;
+
+            int dragonRoom = -dragonDelay;
+            if (dragonDelay != Int32.MaxValue)
+                dragonRoom -= 1;
+
+            bool[] destroyed = new bool[labyrinth.VertexCount];
+            
             (var routeExists, var route) =
-                FindEscapeWithHeadstartRec(labyrinth, startingTorches + roomTorches[0], roomTorches, debt - roomGold[0], roomGold, dragonDelay, visited, 0);
+                FindEscapeWithHeadstartRec(labyrinth, roomTorches, roomGold, visited, 0, dragonRoom, destroyed);
             if (route == null)
                 return (false, null);
 
@@ -89,69 +100,68 @@ namespace ASD
             return (false, null);
         }
         
-        public (bool routeExists, List<int> route) FindEscapeWithHeadstartRec(Graph labyrinth, int startingTorches, int[] roomTorches, int debt, int[] roomGold, 
-            int dragonDelay, int[] visited, int room)
+        public (bool routeExists, List<int> route) FindEscapeWithHeadstartRec(Graph labyrinth, int[] roomTorches, int[] roomGold, 
+            (int next, int torches, int debt)[] visited, int room, int dragonRoom, bool[] destroyed)
         {
-            if (room == labyrinth.VertexCount - 1)
+            if (room == labyrinth.VertexCount - 1 && visited[room].debt <= 0)
             {
-                if (debt <= 0)
-                    return (true, new List<int>(){room});
-
-                return (false, null); // moze chodzi o to, ze mozna przejsc przez koniec dalej?
-                // wyszlo na to samo :(
-                // bool end = true;
-                // foreach (var n in labyrinth.OutNeighbors(room))
-                // {
-                //     if (visited[room] == 0)
-                //         end = false;
-                // }
-                //
-                // if (end)
-                //     return (false, null);
+                return (true, new List<int>(){room});
             }
-            else if (startingTorches <= 0)
+            else if (visited[room].torches <= 0)
             {
                 return (false, null);
             }
-            // TODO: trzeba jakos zapisac wiercholki, ktore odwiedzil smok, bo teraz mozna je odwiedzic, (i je odwiedzam :( )
+
+            if (dragonRoom < 0)
+            {
+                dragonRoom++;
+                if (dragonRoom == 0)
+                    destroyed[dragonRoom] = true;
+            }
+            else
+            {
+                dragonRoom = visited[dragonRoom].next;
+                destroyed[dragonRoom] = true;
+            }
+
             bool routeExists = false;
-            List<int> route = null;
+            List<int> route = new List<int>();
             foreach (var neighbor in labyrinth.OutNeighbors(room))
             {
-                // if (visited[neighbor] != 0 && visited[neighbor] < visited[room] - dragonDelay) // TODO: przydaloby sie stare visited[room]
-                //     continue;
-                
-                if (visited[neighbor] != 0 && visited[room] - visited[neighbor] > dragonDelay)
+                if (destroyed[neighbor])
                     continue;
+                if (visited[room].torches - 1 + roomTorches[neighbor] <= visited[neighbor].torches &&
+                    visited[room].debt - roomGold[neighbor] >= visited[neighbor].debt && neighbor != labyrinth.VertexCount - 1)
+                    continue;
+
+                visited[room].next = neighbor;
+                (int, int, int) temp = visited[neighbor];
+                visited[neighbor].debt = visited[room].debt - roomGold[neighbor];
+                visited[neighbor].torches = visited[room].torches - 1 + roomTorches[neighbor];
+                int g = roomGold[neighbor];
+                int t = roomTorches[neighbor];
+                roomGold[neighbor] = 0;
+                roomTorches[neighbor] = 0;
                 
-                if (visited[neighbor] != 0)
-                {
-                    int oldDelay = dragonDelay;
-                    dragonDelay -= visited[room] - visited[neighbor];
-                    int temp = visited[neighbor];// TODO: moze nie robic tego, tylko zachowywac stare numery?
-                    visited[neighbor] = visited[room] + 1;
-                    (routeExists, route) =
-                        FindEscapeWithHeadstartRec(labyrinth, startingTorches - 1, roomTorches,
-                            debt, roomGold, dragonDelay, visited, neighbor);
-                    dragonDelay = oldDelay;
-                    visited[neighbor] = temp;
-                }
-                else
-                {
-                    visited[neighbor] = visited[room] + 1;
-                    (routeExists, route) =
-                        FindEscapeWithHeadstartRec(labyrinth, startingTorches + roomTorches[neighbor] - 1, roomTorches,
-                            debt - roomGold[neighbor], roomGold, dragonDelay, visited, neighbor);
-                    visited[neighbor] = 0;
-                }
-                
+                (routeExists, route) = FindEscapeWithHeadstartRec(labyrinth,
+                    roomTorches, roomGold, visited, neighbor, dragonRoom, destroyed);
+
                 if (routeExists)
                     break;
+                
+                visited[neighbor] = temp;
+                roomGold[neighbor] = g;
+                roomTorches[neighbor] = t;
             }
-            if (routeExists)
-                route.Add(room);
+
+            if (dragonRoom >= 0)
+                destroyed[dragonRoom] = false;
+
+            if (!routeExists)
+                return (false, null);
             
-            return (routeExists, route);
+            route.Add(room);
+            return (true, route);
         }
     }
 }
